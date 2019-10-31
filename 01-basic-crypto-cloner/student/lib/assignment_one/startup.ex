@@ -1,7 +1,7 @@
 defmodule AssignmentOne.Startup do
   require IEx
 
-  # This is just here to help you. 
+  # This is just here to help you.
   # If you prefer another implementation, go ahead and change this (with the according startup callback)
   @from (DateTime.utc_now() |> DateTime.to_unix()) - 60 * 60 * 24 * 7
   @until DateTime.utc_now() |> DateTime.to_unix()
@@ -13,7 +13,7 @@ defmodule AssignmentOne.Startup do
 
   def startup(%__MODULE__{} = info) do
     # Implement this module
-    AssignmentOne.Logger.start_link()
+    # AssignmentOne.Logger.start_link()
     # Implement this module
     AssignmentOne.ProcessManager.start_link()
     # Implement this module
@@ -24,7 +24,10 @@ defmodule AssignmentOne.Startup do
   end
 
   defp retrieve_coin_pairs() do
-    # IMPLEMENT
+    url = "https://poloniex.com/public?command=returnTicker"
+    {:ok, response} = Tesla.get(url)
+    parsed = response.body |> Jason.decode!()
+    pairs = parsed |> Enum.map(fn {key,_value} -> key end)
   end
 
   defp start_processes(pairs, info) when is_list(pairs) do

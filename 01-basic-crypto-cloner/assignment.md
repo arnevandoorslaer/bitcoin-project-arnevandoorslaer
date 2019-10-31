@@ -33,7 +33,7 @@ Requirements:
   * What coin data is requested (coin, start unix time stamp, end unix timestamp)
 * The above 3 processes should be `name registered`
 * Then there are the worker processes
-  * They send a message to the process that manages requests/second. They want to access the API, but want permission from this process.
+  * T  process that manages requests/second. They want to access the API, but want permission from this process.
   * They receive a message from this process, saying "ok, go and do your request".
   * They do the request and keep the result in their `state`
   * They send the details to the logger. _Keep in mind that when you try to retrieve more than 1000 records, the result is just 1000 records and you do not have all the records in the specified time frame! In this case, only log that your time frame was too big! The next request could be e.g. half the time frame of what you initially requested._
