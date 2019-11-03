@@ -4,6 +4,7 @@ defmodule AssignmentOne.ProcessManager do
   defstruct [ data: [] ]
 
   def start_link() do
+    AssignmentOne.Logger.log("Starting processmanager")
     GenServer.start_link(__MODULE__,
       :ok, name: __MODULE__)
   end
@@ -14,7 +15,7 @@ defmodule AssignmentOne.ProcessManager do
   end
 
   def handle_call(:get_data, _sender , state) do
-    {:reply, state.children, state}
+    {:reply, state.data, state}
   end
 
   def retrieve_coin_processes() do

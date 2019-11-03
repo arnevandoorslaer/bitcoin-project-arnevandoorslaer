@@ -3,41 +3,47 @@ defmodule AssignmentOne.RateLimiter do
 
   defstruct [ rate: 5, queue: [] ]
 
-  def start_link(request_second) do
-    GenServer.start_link(__MODULE__, request_second, name: __MODULE__)
+  def start_link(req_sec) do
+    AssignmentOne.Logger.log("RateLimiter started")
+    GenServer.start_link(__MODULE__, req_sec, name: __MODULE__)
   end
-  
-  def init(request_second) do
-    IO.puts("Initial call rate_limiter #{request_second}")
-    state = %__MODULE__{ rate: request_second, queue: [] }
+
+  def init(req_seq) do
+    rate = req_seq.req_per_sec
+    state = %__MODULE__{ rate: rate, queue: [] }
     send(self(), :tick)
     {:ok, state}
   end
 
-  def handle_cast({:set_rate, new_rate}, state) do
-    {:noreply, %{ state | rate: new_rate }}
+  def change_rate_limit(new_rate) do
+    GenServer.cast(__MODULE__, {:set_rate, new_rate})
   end
 
-  def change_rate_limit(new_rate) do
-    GenServer.cast(__MODULE__, { :set_rate, new_rate })
+  def handle_cast({:set_rate, newRate}, state) do
+    new_state = %{ state | rate: newRate }
+    {:noreply, new_state}
   end
 
   def handle_cast({:request_permission, pid}, state) do
-    {:noreply, %{ state | queue: state.queue ++ [pid] }}
+    new_state = %{ state | queue: state.queue ++ [pid] }
+    {:noreply, new_state}
   end
 
   def request_permission(pid) do
-    Genserver.cast(__MODULE__,{:request_permission, pid})
+    GenServer.cast(__MODULE__, {:request_permission, pid})
   end
 
   def handle_info(:tick, state = %__MODULE__{ queue: [] }) do
-    Process.send_after(self(), :tick, 1000 / state.rate)
+    rate = trunc(1000 / state.rate)
+    Process.send_after(self(), :tick, rate)
     {:noreply, state}
   end
 
-  def handle_info(:tick, state = %__MODULE__{ queue: [x | xs] }) do
-    Process.send(x, :permission_granted)
-    Process.send_after(self(), :tick, 1000 / state.rate)
-    {:noreply, %{state | queue: xs}}
+  def handle_info(:tick, state = %__MODULE__{ rate: r, queue: [x | xs] }) do
+    send(x, :go)
+    rate = trunc(1000 / r)
+    Process.send_after(self(), :tick, rate)
+    new_state = %{state | queue: xs}
+    {:noreply, new_state}
   end
 end

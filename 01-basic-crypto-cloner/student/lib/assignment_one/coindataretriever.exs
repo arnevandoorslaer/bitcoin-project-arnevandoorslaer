@@ -1,21 +1,41 @@
 defmodule AssignmentOne.CoindataRetriever do
-
   use GenServer
+  use Tesla
+  defstruct pair: {}, history: [], from: {}, until: {}
 
-  defstruct []
-
-  def start_link() do
-    GenServer.start_link(__MODULE__)
+  def start(pair, from, until) do
+    GenServer.start(__MODULE__, {pair, from, until})
   end
 
-  def init(request_second) do
-    IO.puts("Initial call rate_limiter #{request_second}")
-    state = %__MODULE__{ rate: request_second, queue: [] }
-    send(self(), :tick)
+  def init({pair, from, until}) do
+    IO.puts("Initial call pair #{pair}")
+    AssignmentOne.RateLimiter.request_permission(self())
+    AssignmentOne.ProcessManager.add_entry(pair, self())
+    state = %__MODULE__{ pair: pair, history: [], from: from, until: until }
     {:ok, state}
   end
 
-  def get_history(PID) when is_pid(pid) do
+  def handle_info(:go, state) do
+    AssignmentOne.RateLimiter.request_permission(self())
+    history = retrieve_pair_history(state.pair, state.from, state.until)
+    from = state.from - 1800
+    until = state.until
+    {:noreply, %{state | history: history, from: from, until: until}}
+  end
 
+  def retrieve_pair_history(pair, from, until) do
+    url = "https://poloniex.com/public?command=returnTradeHistory&currencyPair=#{pair}&start=#{inspect(from)}&end=#{inspect(until)}"
+    AssignmentOne.Logger.log("Request executed at #{inspect(:calendar.universal_time())} | coin: #{pair}, start: #{inspect(from)}, end: #{inspect(until)}")
+    {:ok, response} = Tesla.get(url)
+    response.body|>Jason.decode!()
+  end
+
+  def get_history(pid) do
+    GenServer.call(pid, :history)
+  end
+
+  def handle_call(:history, _from, state) do
+    return_state = {state.pair, state.history}
+    {:reply, return_state, state}
   end
 end

@@ -1,5 +1,6 @@
 defmodule AssignmentOne.Startup do
   require IEx
+  use Tesla
 
   # This is just here to help you.
   # If you prefer another implementation, go ahead and change this (with the according startup callback)
@@ -12,11 +13,8 @@ defmodule AssignmentOne.Startup do
     do: {:ok, spawn_link(__MODULE__, :startup, [struct(__MODULE__, args)])}
 
   def startup(%__MODULE__{} = info) do
-    # Implement this module
-    # AssignmentOne.Logger.start_link()
-    # Implement this module
+    AssignmentOne.Logger.start_link()
     AssignmentOne.ProcessManager.start_link()
-    # Implement this module
     AssignmentOne.RateLimiter.start_link(Map.from_struct(info))
     retrieve_coin_pairs() |> start_processes(info)
 
@@ -27,11 +25,14 @@ defmodule AssignmentOne.Startup do
     url = "https://poloniex.com/public?command=returnTicker"
     {:ok, response} = Tesla.get(url)
     parsed = response.body |> Jason.decode!()
-    pairs = parsed |> Enum.map(fn {key,_value} -> key end)
+    parsed |> Enum.map(fn {key, _value} -> key end)
   end
 
   defp start_processes(pairs, info) when is_list(pairs) do
-    # IMPLEMENT
+    Enum.each(pairs,
+      fn pair ->
+        AssignmentOne.CoindataRetriever.start(pair, info.from, info.until)
+      end)
   end
 
   defp keep_running_until_stopped() do
