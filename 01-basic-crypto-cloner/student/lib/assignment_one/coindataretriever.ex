@@ -17,10 +17,7 @@ defmodule AssignmentOne.CoindataRetriever do
 
   def handle_info(:go, state) do
     AssignmentOne.RateLimiter.request_permission(self())
-    history = retrieve_pair_history(state.pair, state.from, state.until)
-    from = state.from - 1800
-    until = state.until
-    {:noreply, %{state | history: history, from: from, until: until}}
+    {:noreply, %{state | history: retrieve_pair_history(state.pair, state.from, state.until), from: state.from - 1800, until: state.until}}
   end
 
   def retrieve_pair_history(pair, from, until) do
