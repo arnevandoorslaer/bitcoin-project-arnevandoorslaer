@@ -4,7 +4,7 @@ defmodule AssignmentOne.Startup do
 
   # This is just here to help you.
   # If you prefer another implementation, go ahead and change this (with the according startup callback)
-  @from (DateTime.utc_now() |> DateTime.to_unix()) - 60 * 60 * 24 * 7
+  @from (DateTime.utc_now() |> DateTime.to_unix()) - 3600
   @until DateTime.utc_now() |> DateTime.to_unix()
 
   defstruct from: @from, until: @until, req_per_sec: 5
