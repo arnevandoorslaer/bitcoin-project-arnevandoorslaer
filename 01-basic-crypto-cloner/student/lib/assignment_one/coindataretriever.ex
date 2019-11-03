@@ -5,7 +5,6 @@ defmodule AssignmentOne.CoindataRetriever do
   defstruct pair: {}, history: [], from: {}, until: {}
 
   def start(pair, from, until) do
-    AssignmentOne.Logger.log("Retrieving #{pair}")
     GenServer.start(__MODULE__, {pair, from, until})
   end
 
@@ -26,7 +25,7 @@ defmodule AssignmentOne.CoindataRetriever do
 
   def retrieve_pair_history(pair, from, until) do
     url = "https://poloniex.com/public?command=returnTradeHistory&currencyPair=#{pair}&start=#{inspect(from)}&end=#{inspect(until)}"
-    AssignmentOne.Logger.log("Retrieved coin at #{inspect(:calendar.universal_time())} | coin: #{pair}, start: #{inspect(from)}, end: #{inspect(until)}")
+    AssignmentOne.Logger.log("Requested coin history: #{pair}, start: #{inspect(from)}, end: #{inspect(until)} at #{inspect(:calendar.universal_time())}")
     {:ok, response} = Tesla.get(url)
     response.body |> Jason.decode!()
   end
