@@ -5,7 +5,7 @@ defmodule AssignmentOneTest do
 
   test "Necessary processes are alive" do
     # Normally you shouldn't adjust this, but feel free to raise the amount if necessary
-    :timer.sleep(1000)
+    :timer.sleep(500)
     assert Process.whereis(Logger) != nil
     assert Process.whereis(ProcessManager) != nil
     assert Process.whereis(RateLimiter) != nil
@@ -16,12 +16,13 @@ defmodule AssignmentOneTest do
     procs = ProcessManager.retrieve_coin_processes()
     assert Enum.all?(procs, &is_tuple/1)
     assert Enum.all?(procs, fn {bin, pid} -> is_binary(bin) and is_pid(pid) end)
+    # NOTE: This can change all the time... verify this manually and adjust the value
     assert length(procs) > 90
   end
 
   test "ProcessManager restarts dead processes" do
     # Normally you shouldn't adjust this, but feel free to raise the amount if necessary
-    :timer.sleep(2000)
+    :timer.sleep(500)
     amount_of_processes = ProcessManager.retrieve_coin_processes() |> length()
 
     ProcessManager.retrieve_coin_processes()
