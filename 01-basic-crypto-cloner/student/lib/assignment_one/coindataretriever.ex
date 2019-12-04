@@ -1,4 +1,4 @@
-defmodule AssignmentOne.CoindataRetriever do
+defmodule Assignment.CoindataRetriever do
   use GenServer
   use Tesla
 

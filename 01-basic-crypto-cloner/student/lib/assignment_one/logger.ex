@@ -1,4 +1,4 @@
-defmodule AssignmentOne.Logger do
+defmodule Assignment.Logger do
   use GenServer
 
   defstruct [ data: [] ]

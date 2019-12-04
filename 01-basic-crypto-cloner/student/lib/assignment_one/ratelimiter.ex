@@ -1,15 +1,15 @@
-defmodule AssignmentOne.RateLimiter do
+defmodule Assignment.RateLimiter do
   use GenServer
 
-  defstruct [ rate: 5, queue: [] ]
+  defstruct [ rate: Application.get_env(:assignment, :rate), queue: [] ]
 
   def start_link(info) do
     AssignmentOne.Logger.log("Starting ratelimiter")
-    GenServer.start_link(__MODULE__, info, name: __MODULE__)
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init(info) do
-    state = %__MODULE__{ rate: info.req_per_sec, queue: [] }
+    state = %__MODULE__{ }
     send(self(), :tick)
     {:ok, state}
   end
@@ -18,16 +18,16 @@ defmodule AssignmentOne.RateLimiter do
     GenServer.cast(__MODULE__, { :set_rate, new_rate })
   end
 
+  def request_permission(pid) do
+    GenServer.cast(__MODULE__,{:request_permission, pid})
+  end
+
   def handle_cast({:set_rate, new_rate}, state) do
     {:noreply, %{ state | rate: new_rate }}
   end
 
   def handle_cast({:request_permission, pid}, state) do
     {:noreply, %{ state | queue: state.queue ++ [pid] }}
-  end
-
-  def request_permission(pid) do
-    GenServer.cast(__MODULE__,{:request_permission, pid})
   end
 
   def handle_info(:tick, state = %__MODULE__{ queue: [] }) do

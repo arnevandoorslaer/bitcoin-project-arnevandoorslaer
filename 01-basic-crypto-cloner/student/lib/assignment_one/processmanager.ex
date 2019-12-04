@@ -1,4 +1,4 @@
-defmodule AssignmentOne.ProcessManager do
+defmodule Assignment.ProcessManager do
   use GenServer
 
   defstruct [ data: [] ]
@@ -28,5 +28,18 @@ defmodule AssignmentOne.ProcessManager do
 
   def add_entry(coin_pair, pid) do
     GenServer.cast(__MODULE__, {:add_pid, {coin_pair, pid}})
+  end
+
+  def handle_continue(:add_pair, state) do
+    pairs = retrieve_coin_pairs()
+    Enum.each(pairs, fn pair -> Assignment.CoindataRetrieverSupervisor.start_child(pair) end)
+    {:noreply, state}
+  end
+
+  def retrieve_coin_pairs() do
+    url = "https://poloniex.com/public?command=returnTicker"
+    {:ok, response} = Tesla.get(url)
+    parsed = response.body |> Jason.decode!()
+    parsed |> Enum.map(fn {key, _value} -> key end)
   end
 end

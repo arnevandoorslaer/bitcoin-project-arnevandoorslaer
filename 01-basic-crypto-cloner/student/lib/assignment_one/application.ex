@@ -1,16 +1,14 @@
-defmodule AssignmentOne.Application do
+defmodule Assignment.Application do
   use Application
 
   def start(_type, _args) do
     children = [
-      # Do not change this file!
-      %{
-        id: AssignmentOne.Startup,
-        start: {AssignmentOne.Startup, :start_link, []}
-      }
+      {Assignment.Logger,[]},
+      {Assignment.RateLimiter, []},
+      {Assignment.HistoryKeeperWorkerSupervisor,[]},
+      {Assignment.CoindataSupervisor,[]}
     ]
-
-    opts = [strategy: :one_for_one, name: AssignmentOne.Supervisor]
+    opts = [strategy: :one_for_one, name: Assignment.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

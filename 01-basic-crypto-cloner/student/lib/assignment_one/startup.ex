@@ -1,4 +1,4 @@
-defmodule AssignmentOne.Startup do
+defmodule Assignment.Startup do
   require IEx
   use Tesla
 
