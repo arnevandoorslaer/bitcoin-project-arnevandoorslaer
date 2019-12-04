@@ -1,7 +1,7 @@
-defmodule AssignmentOneTest do
+defmodule AssignmentTest do
   use ExUnit.Case
 
-  alias AssignmentOne.{Logger, ProcessManager, RateLimiter, CoindataRetriever}
+  alias Assignment.{Logger, ProcessManager, RateLimiter, CoindataRetriever}
 
   test "Necessary processes are alive" do
     # Normally you shouldn't adjust this, but feel free to raise the amount if necessary
