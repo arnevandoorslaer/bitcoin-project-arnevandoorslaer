@@ -1,43 +1,54 @@
 defmodule Assignment.ProcessManager do
   use GenServer
+  defstruct data: []
 
-  defstruct [ data: [] ]
-
-  def start_link() do
-    AssignmentOne.Logger.log("Starting processmanager")
-    GenServer.start_link(__MODULE__,
-      :ok, name: __MODULE__)
+  def start_link(_) do
+    Assignment.Logger.log("", "Starting ProcessManager")
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def init(:ok) do
+  def init(_) do
     state = %__MODULE__{data: []}
-    {:ok, state}
+    {:ok, state, {:continue, :add_pair}}
   end
 
-  def handle_call(:get_data, _sender , state) do
+  def handle_call(:get_data, _, state) do
     {:reply, state.data, state}
   end
 
-  def retrieve_coin_processes() do
-    GenServer.call(__MODULE__, :get_data)
-  end
-
   def handle_cast({:add_pid, {coin_pair, pid}}, state) do
-    {:noreply, %{ state | data: state.data ++ [{coin_pair, pid}] }}
-  end
-
-  def add_entry(coin_pair, pid) do
-    GenServer.cast(__MODULE__, {:add_pid, {coin_pair, pid}})
+    {:noreply, %{state | data: state.data ++ [{coin_pair, pid}]}}
   end
 
   def handle_continue(:add_pair, state) do
+    Assignment.Logger.log("", "Continue ProcessManager")
     pairs = retrieve_coin_pairs()
-    Enum.each(pairs, fn pair -> Assignment.CoindataRetrieverSupervisor.start_child(pair) end)
+
+    Enum.each(pairs, fn pair ->
+      {_, pid} = Assignment.CoindataRetrieverSupervisor.start_child(pair)
+      add_entry(pair, pid)
+    end)
+
     {:noreply, state}
   end
 
+  def retrieve_coin_processes do
+    children = GenServer.call(__MODULE__, :get_data)
+    if length(children) == 0 do
+      retrieve_coin_processes()
+    else
+      children
+    end
+  end
+
+  def add_entry(pair, pid) do
+    GenServer.cast(__MODULE__, {:add_pid, {pair, pid}})
+  end
+
+  @spec retrieve_coin_pairs :: none
   def retrieve_coin_pairs() do
-    url = "https://poloniex.com/public?command=returnTicker"
+    Assignment.Logger.log("", "Retrieving coinpairs in ProcessManager")
+    url = 'https://poloniex.com/public?command=returnTicker'
     {:ok, response} = Tesla.get(url)
     parsed = response.body |> Jason.decode!()
     parsed |> Enum.map(fn {key, _value} -> key end)

@@ -71,8 +71,8 @@ defmodule AssignmentTest do
 
   test "History workers have correct output" do
     list = HistoryKeeperManager.retrieve_history_processes()
-
     assert Enum.all?(list, fn {k, p} ->
+      IO.puts("#{inspect HistoryKeeperWorker.get_history(p)}")
              case HistoryKeeperWorker.get_history(p) |> Tuple.to_list() |> length do
                2 ->
                  {resp_k, resp_h} = HistoryKeeperWorker.get_history(p)

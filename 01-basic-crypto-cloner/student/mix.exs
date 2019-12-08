@@ -1,11 +1,11 @@
 defmodule AssignmentOne.MixProject do
   use Mix.Project
-
+1
   def project do
     [
       app: :assignment,
       version: "0.1.0",
-      elixir: "~> 1.9.2-1",
+      elixir: "~> 1.9.1",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]

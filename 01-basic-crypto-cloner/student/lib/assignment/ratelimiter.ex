@@ -3,23 +3,15 @@ defmodule Assignment.RateLimiter do
 
   defstruct [ rate: Application.get_env(:assignment, :rate), queue: [] ]
 
-  def start_link(info) do
-    AssignmentOne.Logger.log("Starting ratelimiter")
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  def start_link(_) do
+    Assignment.Logger.log("","Starting RateLimiter")
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def init(info) do
+  def init(_) do
     state = %__MODULE__{ }
     send(self(), :tick)
     {:ok, state}
-  end
-
-  def change_rate_limit(new_rate) do
-    GenServer.cast(__MODULE__, { :set_rate, new_rate })
-  end
-
-  def request_permission(pid) do
-    GenServer.cast(__MODULE__,{:request_permission, pid})
   end
 
   def handle_cast({:set_rate, new_rate}, state) do
@@ -39,5 +31,13 @@ defmodule Assignment.RateLimiter do
     send(x, :go)
     Process.send_after(self(), :tick, trunc(1000 / state.rate))
     {:noreply, %{state | queue: xs}}
+  end
+
+  def change_rate_limit(new_rate) do
+    GenServer.cast(__MODULE__, { :set_rate, new_rate })
+  end
+
+  def request_permission(pid) do
+    GenServer.cast(__MODULE__,{:request_permission, pid})
   end
 end

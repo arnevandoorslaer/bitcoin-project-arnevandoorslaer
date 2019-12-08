@@ -1,12 +1,13 @@
-defmodule Assignment.CoindataRetrieversupervisor do
+defmodule Assignment.CoindataRetrieverSupervisor do
   use DynamicSupervisor
 
   def start_link(_) do
+    Assignment.Logger.log("","Starting CoindataRetrieverSupervisor")
     DynamicSupervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   def start_child(pair) do
-    spec = {Assignment.CoindataRetriever, pair: pair}
+    spec = {Assignment.CoindataRetriever, pair}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 

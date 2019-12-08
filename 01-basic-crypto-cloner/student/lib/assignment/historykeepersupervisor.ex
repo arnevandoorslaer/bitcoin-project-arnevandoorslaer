@@ -1,18 +1,16 @@
 defmodule Assignment.HistoryKeeperSupervisor do
-
-  use DynamicSupervisor
+  use Supervisor
 
   def start_link(_) do
-    DynamicSupervisor.start_link(__MODULE__, nil, name: __MODULE__)
-  end
-
-  def start_child(pair) do
-    spec = {Assignment.HistoryKeeperWorker, pair: pair}
-    DynamicSupervisor.start_child(__MODULE__, spec)
+    Assignment.Logger.log("","Starting HistoryKeeperSupervisor")
+    Supervisor.start_link(__MODULE__,nil)
   end
 
   def init(_) do
-    DynamicSupervisor.init(strategy: :one_for_one)
+    children = [
+      {Assignment.HistoryKeeperManager, []},
+      {DynamicSupervisor, strategy: :one_for_one, name: Assignment.HistoryKeeperWorkerSupervisor}
+    ]
+    Supervisor.init(children, strategy: :one_for_one)
   end
-
 end

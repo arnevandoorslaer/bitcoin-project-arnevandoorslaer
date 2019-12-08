@@ -2,14 +2,15 @@ defmodule Assignment.CoindataSupervisor do
   use Supervisor
 
   def start_link(_) do
-    Supervisor.start_link(__MODULE__,nil, name: __MODULE__)
+    Assignment.Logger.log("","Starting CoindataSupervisor")
+    Supervisor.start_link(__MODULE__,nil)
   end
 
   def init(_) do
-   children = [
-     { DynamicSupervisor, strategy: :one_for_one, name: Assignment.CoindataRetrieverSupervisor},
-     {Assignment.ProcessManager, []}
-   ]
-   Supervisor.init(children, strategy: :one_for_one)
+    children = [
+      {Assignment.ProcessManager, []},
+      {DynamicSupervisor, strategy: :one_for_one, name: Assignment.CoindataRetrieverSupervisor}
+    ]
+    Supervisor.init(children, strategy: :one_for_one)
   end
 end
