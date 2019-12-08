@@ -3,7 +3,7 @@ defmodule Assignment.HistoryKeeperManager do
   defstruct data: []
 
   def start_link(info) do
-    Assignment.Logger.log("", "Starting HistoryKeeperManager")
+    Assignment.Logger.log(:debug, "Starting HistoryKeeperManager")
     GenServer.start_link(__MODULE__, info, name: __MODULE__)
   end
 

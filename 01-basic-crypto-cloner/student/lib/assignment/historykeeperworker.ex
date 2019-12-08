@@ -1,17 +1,38 @@
 defmodule Assignment.HistoryKeeperWorker do
   use GenServer
-  defstruct [history: [], frames: [], pair: nil]
+  defstruct [history: [], frames: [{ Application.get_env(:assignment, :from), Application.get_env(:assignment, :until)}], pair: nil]
 
   def start_link(pair) do
     GenServer.start_link(__MODULE__, pair)
   end
 
   def init(pair) do
-    from = Application.get_env(:assignment, :from)
-    until = Application.get_env(:assignment, :until)
-
-    state = %__MODULE__{pair: pair, history: [], frames: [{from, until}]}
+    state = %__MODULE__{pair: pair}
+    send(self(), :frame_check)
     {:ok, state}
+  end
+
+  def handle_info(:frame_check, state) do
+    if(above_one_month?(state.frames)) do
+      {from,until} = List.first(state.frames)
+      months = ceil((until-from) / (60*60*24*30))
+      width = ceil((until-from) / months)
+      {:noreply, %{state | frames: divide_frames(from,months,width)}}
+    else
+      {:noreply, state}
+    end
+  end
+
+  def divide_frames(start,counter,width) do
+    if (counter < 1) do
+      []
+    else
+      List.flatten([{floor(start + ((counter-1) * width)),ceil(start + (counter * width))}] ++ divide_frames(start,counter-1,width))
+    end
+  end
+
+  def above_one_month?(frames) do
+    Enum.any?(frames, fn {from, until} -> until - from >= 60*60*24*30 end)
   end
 
   def handle_call(:request_frame, _, state) do
@@ -39,8 +60,7 @@ defmodule Assignment.HistoryKeeperWorker do
     middle = trunc(start_frame + trunc(end_frame - start_frame) / 2)
     first = {start_frame,middle}
     second = {middle,end_frame}
-    new_frames = List.delete_at(state.frames, 0)
-    {:noreply, %{state | frames: List.flatten([new_frames] ++ [first,second])}}
+    {:noreply, %{state | frames: List.flatten([state.frames] ++ [first,second])}}
   end
 
   def request_frame(pair) do

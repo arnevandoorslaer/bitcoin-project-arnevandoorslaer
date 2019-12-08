@@ -2,7 +2,7 @@ defmodule Assignment.CoindataRetrieverSupervisor do
   use DynamicSupervisor
 
   def start_link(_) do
-    Assignment.Logger.log("","Starting CoindataRetrieverSupervisor")
+    Assignment.Logger.log(:debug,"Starting CoindataRetrieverSupervisor")
     DynamicSupervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 

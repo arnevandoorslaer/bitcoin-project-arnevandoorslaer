@@ -3,7 +3,7 @@ defmodule Assignment.ProcessManager do
   defstruct data: []
 
   def start_link(_) do
-    Assignment.Logger.log("", "Starting ProcessManager")
+    Assignment.Logger.log(:debug, "Starting ProcessManager")
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
@@ -21,7 +21,7 @@ defmodule Assignment.ProcessManager do
   end
 
   def handle_continue(:add_pair, state) do
-    Assignment.Logger.log("", "Continue ProcessManager")
+    Assignment.Logger.log(:debug, "Continue ProcessManager")
     pairs = retrieve_coin_pairs()
 
     Enum.each(pairs, fn pair ->
@@ -47,7 +47,7 @@ defmodule Assignment.ProcessManager do
 
   @spec retrieve_coin_pairs :: none
   def retrieve_coin_pairs() do
-    Assignment.Logger.log("", "Retrieving coinpairs in ProcessManager")
+    Assignment.Logger.log(:debug, "Retrieving coinpairs in ProcessManager")
     url = 'https://poloniex.com/public?command=returnTicker'
     {:ok, response} = Tesla.get(url)
     parsed = response.body |> Jason.decode!()

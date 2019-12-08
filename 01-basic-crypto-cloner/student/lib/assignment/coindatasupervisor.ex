@@ -2,7 +2,7 @@ defmodule Assignment.CoindataSupervisor do
   use Supervisor
 
   def start_link(_) do
-    Assignment.Logger.log("","Starting CoindataSupervisor")
+    Assignment.Logger.log(:debug,"Starting CoindataSupervisor")
     Supervisor.start_link(__MODULE__,nil)
   end
 
