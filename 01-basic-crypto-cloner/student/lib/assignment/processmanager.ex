@@ -33,11 +33,11 @@ defmodule Assignment.ProcessManager do
   end
 
   def retrieve_coin_processes do
-    children = GenServer.call(__MODULE__, :get_data)
-    if length(children) == 0 do
+    data = GenServer.call(__MODULE__, :get_data)
+    if length(data) == 0 do
       retrieve_coin_processes()
     else
-      children
+      data
     end
   end
 
