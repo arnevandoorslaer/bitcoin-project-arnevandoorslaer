@@ -2,7 +2,7 @@ defmodule Assignment.HistoryKeeperWorkerSupervisor do
   use DynamicSupervisor
 
   def start_link(_) do
-    Assignment.Logger.log(:info, "Starting HistoryKeeperWorkerSupervisor")
+    #Assignment.Logger.log(:info, "Starting HistoryKeeperWorkerSupervisor")
     DynamicSupervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 

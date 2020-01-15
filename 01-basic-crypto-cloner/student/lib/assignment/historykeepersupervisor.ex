@@ -2,7 +2,7 @@ defmodule Assignment.HistoryKeeperSupervisor do
   use Supervisor
 
   def start_link(_) do
-    Assignment.Logger.log(:info,"Starting HistoryKeeperSupervisor")
+    #Assignment.Logger.log(:info,"Starting HistoryKeeperSupervisor")
     Supervisor.start_link(__MODULE__,nil)
   end
 

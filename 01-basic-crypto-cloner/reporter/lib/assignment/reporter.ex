@@ -35,7 +35,12 @@ defmodule Reporter.Reporter do
     IO.puts " "
     IO.puts "node | pair | history | percentage"
     Enum.each(list,fn {node,pair,history,percentage} ->
-      IO.inspect {check_node_name(node),pair,history,percentage}
+      node_out = check_node_name(node)
+      pair_out = parse_pair(pair)
+      history_out = history
+      percentage_out = percentage
+      progress_out = parse_percent(get_percent_output(percentage))
+      IO.puts("#{inspect(node_out)} | #{inspect(pair_out)} | #{inspect(progress_out)} | #{inspect(percentage_out)} | #{inspect(history_out)}")
     end)
     {:noreply,state}
   end
@@ -59,5 +64,29 @@ defmodule Reporter.Reporter do
     string_name = Atom.to_string(node)
     {first,_} = String.split(string_name, "") |> List.pop_at(1)
     "N" <> String.upcase(first)
+  end
+
+  def parse_pair(pair) do
+    if String.length(pair) < 11 do
+      parse_pair(pair <> " ")
+    else
+      pair
     end
+  end
+
+  def get_percent_output(percent) do
+    if percent < 5 do
+      ""
+    else
+      "x" <> get_percent_output(percent - 5)
+    end
+  end
+
+  def parse_percent(percentage) do
+    if String.length(percentage) < 20 do
+      parse_percent(percentage <> "-")
+    else
+      percentage
+    end
+  end
 end

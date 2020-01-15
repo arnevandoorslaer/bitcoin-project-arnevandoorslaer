@@ -38,12 +38,12 @@ defmodule Assignment.CoindataRetriever do
         if (parsed != nil) do
           Assignment.HistoryKeeperWorker.add_history(state.pair,parsed)
         end
-        Assignment.Logger.log(:info,"CoindataRetriever requested coin history: #{state.pair}, start: #{inspect(start_frame)}, end: #{inspect(end_frame)} at #{inspect(:calendar.universal_time())}")
+        #Assignment.Logger.log(:info,"CoindataRetriever requested coin history: #{state.pair}, start: #{inspect(start_frame)}, end: #{inspect(end_frame)} at #{inspect(:calendar.universal_time())}")
         send(self(), :request_permission)
         {:noreply, state}
       end
     else
-      Assignment.Logger.log(:info,"CoindataRetriever no more frames for #{inspect state.pair}")
+      #Assignment.Logger.log(:info,"CoindataRetriever no more frames for #{inspect state.pair}")
       {:noreply, state}
     end
   end
