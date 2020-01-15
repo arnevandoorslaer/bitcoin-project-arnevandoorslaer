@@ -1,16 +1,31 @@
 defmodule Assignment.HistoryKeeperWorker do
-  use GenServer
+  use GenServer, restart: :transient
   defstruct [history: [], frames: [{ Application.get_env(:assignment, :from), Application.get_env(:assignment, :until)}], pair: nil]
 
-  def start_link(pair) do
-    GenServer.start_link(__MODULE__, pair)
+  def start_link(args) when is_list(args) do
+    pair = args[:pair]
+    GenServer.start_link(__MODULE__, args, name: {:via, Registry, {Assignment.HistoryKeeper.Registry, pair}})
   end
 
-  def init(pair) do
-    state = %__MODULE__{pair: pair}
-    send(self(), :frame_check)
-    {:ok, state}
+  def start_link(pair) do
+    GenServer.start_link(__MODULE__, [pair: pair, history: [], frames: [{ Application.get_env(:assignment, :from), Application.get_env(:assignment, :until)}]], name: {:via, Registry, {Assignment.HistoryKeeper.Registry, pair}})
   end
+
+  def init(args) do
+    state = struct(__MODULE__,[pair: args[:pair],history: args[:history],frames: args[:frames]])
+    if(above_one_month?(state.frames)) do
+      {from,until} = List.first(state.frames)
+      months = ceil((until-from) / (60*60*24*30))
+      width = ceil((until-from) / months)
+      {:ok, %{state | frames: divide_frames(from,months,width)}}
+    else
+      {:ok, state}
+    end
+  end
+
+  def stop(pair), do: GenServer.stop(via_tuple(pair), :normal)
+  defp via_tuple(pid) when is_pid(pid), do: pid
+  defp via_tuple(name), do: {:via, Registry, {Assignment.HistoryKeeper.Registry, name}}
 
   def handle_info(:frame_check, state) do
     if(above_one_month?(state.frames)) do
@@ -40,6 +55,10 @@ defmodule Assignment.HistoryKeeperWorker do
     {:reply, List.first(state.frames), %{state | frames: new_frames}}
   end
 
+  def handle_call(:get_frames,_,state) do
+    {:reply, state.frames, state}
+  end
+
   def handle_call(:get_history,_,state) do
     {:reply, {state.pair, state.history}, state}
   end
@@ -64,7 +83,7 @@ defmodule Assignment.HistoryKeeperWorker do
   end
 
   def request_frame(pair) do
-    GenServer.call(Assignment.HistoryKeeperManager.get_pid_for(pair), :request_frame)
+    GenServer.call(Assignment.CoindataCoordinator.get_pid_for(pair), :request_frame)
   end
 
   def get_history(pid) do
@@ -76,14 +95,14 @@ defmodule Assignment.HistoryKeeperWorker do
   end
 
   def delete_frame(pair) do
-    GenServer.cast(Assignment.HistoryKeeperManager.get_pid_for(pair), :delete_frame)
+    GenServer.cast(Assignment.CoindataCoordinator.get_pid_for(pair), :delete_frame)
   end
 
   def add_history(pair, new_history) do
-    GenServer.cast(Assignment.HistoryKeeperManager.get_pid_for(pair),{:add_history, new_history})
+    GenServer.cast(Assignment.CoindataCoordinator.get_pid_for(pair),{:add_history, new_history})
   end
 
   def split_frame({start_frame,end_frame,pair}) do
-    GenServer.cast(Assignment.HistoryKeeperManager.get_pid_for(pair), {:split_frame,start_frame,end_frame})
+    GenServer.cast(Assignment.CoindataCoordinator.get_pid_for(pair), {:split_frame,start_frame,end_frame})
   end
 end

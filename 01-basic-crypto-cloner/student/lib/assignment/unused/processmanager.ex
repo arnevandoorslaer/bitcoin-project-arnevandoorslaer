@@ -45,7 +45,6 @@ defmodule Assignment.ProcessManager do
     GenServer.cast(__MODULE__, {:add_pid, {pair, pid}})
   end
 
-  @spec retrieve_coin_pairs :: none
   def retrieve_coin_pairs() do
     Assignment.Logger.log(:debug, "Retrieving coinpairs in ProcessManager")
     url = 'https://poloniex.com/public?command=returnTicker'

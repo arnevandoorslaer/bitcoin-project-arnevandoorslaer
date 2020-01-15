@@ -1,4 +1,4 @@
-defmodule Assignment.MixProject do
+defmodule Reporter.MixProject do
   use Mix.Project
 
   def project do
@@ -7,7 +7,8 @@ defmodule Assignment.MixProject do
       version: "0.1.0",
       elixir: "~> 1.9.1",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      config_path: "../student/config/config.exs",
     ]
   end
 
@@ -15,7 +16,7 @@ defmodule Assignment.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Assignment.Application, []}
+      mod: {Reporter.Application, []}
     ]
   end
 

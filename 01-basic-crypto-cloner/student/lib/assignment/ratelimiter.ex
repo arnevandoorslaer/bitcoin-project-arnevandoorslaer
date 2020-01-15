@@ -4,7 +4,7 @@ defmodule Assignment.RateLimiter do
   defstruct [ rate: Application.get_env(:assignment, :rate), queue: [] ]
 
   def start_link(_) do
-    Assignment.Logger.log("","Starting RateLimiter")
+    Assignment.Logger.log(:info,"Starting RateLimiter")
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 

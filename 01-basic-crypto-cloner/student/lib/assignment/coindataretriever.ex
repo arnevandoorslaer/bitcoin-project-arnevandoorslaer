@@ -1,10 +1,10 @@
 defmodule Assignment.CoindataRetriever do
-  use GenServer
+  use GenServer, restart: :transient
   use Tesla
   defstruct pair: nil
 
   def start_link(pair) do
-    GenServer.start_link(__MODULE__, pair)
+    GenServer.start_link(__MODULE__, pair, name: {:via, Registry, {Assignment.Coindata.Registry, pair}})
   end
 
   def init(pair) do
@@ -12,6 +12,10 @@ defmodule Assignment.CoindataRetriever do
     send(self(), :request_permission)
     {:ok, state}
   end
+
+  def stop(pair), do: GenServer.stop(via_tuple(pair), :normal)
+  defp via_tuple(pid) when is_pid(pid), do: pid
+  defp via_tuple(name), do: {:via, Registry, {Assignment.Coindata.Registry, name}}
 
   def handle_info(:request_permission, state) do
     :timer.sleep(400)

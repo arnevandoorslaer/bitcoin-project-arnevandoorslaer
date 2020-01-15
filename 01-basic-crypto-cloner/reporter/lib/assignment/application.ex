@@ -1,4 +1,4 @@
-defmodule Assignment.Application do
+defmodule Reporter.Application do
   use Application
 
   def start(_type, _args) do
@@ -7,7 +7,7 @@ defmodule Assignment.Application do
         # The selected clustering strategy. Required.
         strategy: Cluster.Strategy.Epmd,
         # Configuration for the provided strategy. Optional.
-        config: [hosts: [:a@localhost, :b@localhost, :c@localhost]],
+        config: [hosts: [:a@localhost, :b@localhost, :c@localhost, :reporter@localhost]],
         # The function to use for connecting nodes. The node
         # name will be appended to the argument list. Optional
         connect: {:net_kernel, :connect_node, []},
@@ -22,14 +22,10 @@ defmodule Assignment.Application do
 
     children = [
       {Cluster.Supervisor, [topologies, [name: Assignment.ClusterSupervisor]]},
-      {Assignment.Logger, []},
-      {Assignment.RateLimiter, []},
-      {Assignment.CoindataSupervisor, []},
-      {Assignment.HistoryKeeperSupervisor, []},
-      {Assignment.CoindataCoordinator, []}
+      {Reporter.Reporter, []}
     ]
 
-    opts = [strategy: :one_for_one, name: Assignment.Supervisor]
+    opts = [strategy: :one_for_one, name: Reporter.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end
