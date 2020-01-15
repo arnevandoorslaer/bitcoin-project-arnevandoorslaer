@@ -38,7 +38,7 @@ defmodule Reporter.Reporter do
       node_out = check_node_name(node)
       pair_out = parse_pair(pair)
       history_out = history
-      percentage_out = percentage
+      percentage_out = parse_percentage(Integer.to_string(percentage))
       progress_out = parse_percent(get_percent_output(percentage))
       IO.puts("#{inspect(node_out)} | #{inspect(pair_out)} | #{inspect(progress_out)} | #{inspect(percentage_out)} | #{inspect(history_out)}")
     end)
@@ -71,6 +71,14 @@ defmodule Reporter.Reporter do
       parse_pair(pair <> " ")
     else
       pair
+    end
+  end
+
+  def parse_percentage(percentage) do
+    if String.length(percentage) < 3 do
+      parse_percentage(percentage <> " ")
+    else
+      percentage
     end
   end
 
